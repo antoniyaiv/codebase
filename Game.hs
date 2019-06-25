@@ -9,6 +9,18 @@ type Location = String
 type Direction = String
 type Thing = String
 type Response = String
+--Location map that represents [(Item at Location,Location)]
+type LocationMap = [(Thing, Location)]
+locations :: LocationMap
+locations =  [
+    ("princess", "dragon"),
+    ("key", "cave entrance"),
+    ("torch", "castle"),
+    ("sword", "cupboard"),
+    ("myself", "valley"),
+    ("dragon", "living")
+    ]
+
 --Path map that represents [((fromLocation,Direction),toLocation)]
 type PathMap = [((Location, Direction), Location)]
 paths :: PathMap
@@ -26,22 +38,11 @@ paths = [
     (("cage", "e"), "castle"),
     (("cupboard", "w"), "castle")
     ]
---Location map that represents [(Item at Location,Location)]
-type LocationMap = [(Thing, Location)]
-locations :: LocationMap
-locations =  [
-    ("princess", "dragon"),
-    ("key", "cave entrance"),
-    ("torch", "castle"),
-    ("sword", "cupboard"),
-    ("myself", "valley"),
-    ("dragon", "living")
-    ]
 
 type World = (PathMap, LocationMap, Response)
 world :: IO (PathMap, LocationMap, Response)
 world = return (paths, locations, "")
-
+--Entry Point of the Game
 main :: IO (String)
 main = do
     putStrLn "\n****** Welcome to the Dragon Slayer ******\n"
