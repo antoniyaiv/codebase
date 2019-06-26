@@ -50,7 +50,7 @@ main = do
     putStrLn instructions
     start_the_adventure $ return (paths, locations, "")
     return "Adios!"
-
+--Instruction related to the game is store in the instructions variable
 instructions =
     "---------- Instructions ----------\n In order to move ahead in your adventure you will have to make choices using the commands:\n" ++
     "The Commands are::\n" ++
