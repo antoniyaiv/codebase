@@ -17,7 +17,7 @@ locations =  [
     ("key", "cave entrance"),
     ("torch", "castle"),
     ("sword", "cupboard"),
-    ("myself", "valley"),
+    ("user", "valley"),
     ("dragon", "living")
     ]
 
@@ -50,7 +50,7 @@ main = do
     putStrLn instructions
     start_the_adventure $ return (paths, locations, "")
     return "Adios!"
---Instruction related to the game is store in the instructions variable
+--Instruction related to the game is store in the instructions
 instructions =
     "---------- Instructions ----------\n In order to move ahead in your adventure you will have to make choices using the commands:\n" ++
     "The Commands are::\n" ++
@@ -79,7 +79,7 @@ start_the_adventure world = do
 
 game_over :: LocationMap -> Bool
 game_over locations =
-    let user_location = get "myself" locations
+    let user_location = get "user" locations
         princess_location = get "princess" locations
     in user_location == "dead" || (user_location == "valley" && princess_location == "having")
 
@@ -123,7 +123,7 @@ user_choice_2 cmd paths locations
 
 game_take :: Thing -> PathMap -> LocationMap -> World
 game_take thing paths locations =
-    let here = get "myself" locations
+    let here = get "user" locations
         there = get thing locations
     in if here == there
        then (paths, (put thing "having" locations), "Item is picked!.")
@@ -133,29 +133,29 @@ game_take thing paths locations =
 
 game_drop :: Thing -> PathMap -> LocationMap -> World
 game_drop thing paths locations = --(paths, locations, "filler")
-    let here = get "myself" locations
+    let here = get "user" locations
         there = get thing locations
     in if there == "having"
-        then (paths, (put thing here locations), "OK, dropped.")
+        then (paths, (put thing here locations), "Item Dropped!")
         else (paths, locations, "You aren't having it.")
 
 go :: String -> PathMap -> LocationMap -> World
 go direction paths locations = do
-    let user_location = get "myself" locations
+    let user_location = get "user" locations
     if can_move user_location direction paths locations
         then do
             let new_location = move user_location direction paths
-            let new_locations = put "myself" new_location locations
+            let new_locations = put "user" new_location locations
             let response = describe new_location new_locations
             (paths, new_locations, response)
         else (paths, locations, restrict_move user_location direction)
 
 down_from_dragon :: String -> PathMap -> LocationMap -> World
 down_from_dragon direction paths locations =
-    if get "myself" locations == "dragon" &&
+    if get "user" locations == "dragon" &&
        get "dragon" locations == "living" &&
        get "princess" locations == "having"
-           then (paths, put "myself" "dead" locations, description "cave3")
+           then (paths, put "user" "dead" locations, description "cave3")
            else go direction paths locations
 
 look :: PathMap -> LocationMap -> World
@@ -163,42 +163,42 @@ look paths locations =
     if things == []
         then (paths, locations, describe user_location locations)
         else (paths, locations, describe user_location locations ++ "\n\n" ++ things)
-    where user_location = get "myself" locations
+    where user_location = get "user" locations
           things = items_here locations
 
 kill :: PathMap -> LocationMap -> World
 kill paths locations =
-    case get "myself" locations of
+    case get "user" locations of
         "cage" -> (paths,
-                   put "myself" "dead" locations,
-                   "Oh, bad idea! You have just been eaten by a tiger.")
+                   put "user" "dead" locations,
+                   "Oh, Wrong choice! You have just been eaten by a tiger.")
         "cave" -> (paths, locations,
-                   "The dragon's leg is about as tough as a telephone pole.")
+                   "The dragon's skin too tough to be punctured.")
         "dragon" ->
             if get "sword" locations == "having"
                 then (paths,
                       put "dragon" "dead" locations,
-                      "You hack repeatedly at the dragon's back.  Slimy ichor\n" ++
-                     "gushes out of the dragon''s back, and gets all over you.\n" ++
-                     "I think you have killed it, despite the continued twitching.")
+                      "You attack repeatedly at the dragon's head.  It screams in pain,\n" ++
+                     "blood is everywhere.\n" ++
+                     "The Dragon has been killed.")
                 else (paths,
                       locations,
-                      "Beating on the dragon's back with your fists has no\n" ++
-                      "effect.  This is probably just as well.")
-        _ -> (paths, locations, "I see nothing inimical here.")
+                      "Your hands do not stand a chance in front of the dragon.\n" ++
+                      "You need something else to kill it.")
+        _ -> (paths, locations, "There is nothing harmful here")
 
 inventory :: LocationMap -> Response
 inventory locations =
     let my_stuff = [thing | (thing, "having") <- locations]
     in if my_stuff == []
-        then "You aren't having anything."
+        then "You do not have anything yet."
         else intercalate ", " my_stuff
 
 items_here :: LocationMap -> Response
 items_here locations =
-    let here = get "myself" locations
+    let here = get "user" locations
         things = ["There is a " ++ thing ++ " here." |
-                  (thing, place) <- locations, place == here, thing /= "myself"]
+                  (thing, place) <- locations, place == here, thing /= "user"]
     in intercalate "\n" things
 
 -- "get" finds the value of a key in a (key, value) list
@@ -214,7 +214,7 @@ put key value list =
 
 describe :: Location -> LocationMap -> String
 describe new_location locations =
-    let here = get "myself" locations
+    let here = get "user" locations
         dragon_status = get "dragon" locations
         princess_location = get "princess" locations
     in describe_helper here dragon_status princess_location  locations
