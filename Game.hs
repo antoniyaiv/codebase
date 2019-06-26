@@ -1,6 +1,6 @@
 --Adventure Game Using Haskell Programming
 --Game Name: Dragon Slayer
---Author:
+
 
 import Data.List
 import Data.Char
@@ -71,10 +71,13 @@ start_the_adventure world = do
     if game_over locations
         then return ([], [], "")
         else do
+        --Each command will have a prefix 'dragonslayer>'
             putStr "dragonslayer> "
             command <- getLine
+            --Check if the user enter quit
             if command == "quit"
                 then return (paths, locations, "You are a Quitter, Exiting Now....")
+                --In quit is not entered check the command and progress accordingly
                 else  start_the_adventure $ return (user_choice command paths locations)
 
 game_over :: LocationMap -> Bool
@@ -82,19 +85,20 @@ game_over locations =
     let user_location = get "user" locations
         princess_location = get "princess" locations
     in user_location == "dead" || (user_location == "valley" && princess_location == "having")
-
+--Logic for valid movement of player
 can_move :: Location -> Direction -> PathMap -> LocationMap -> Bool
 can_move "valley" "n" _ locations= get "torch" locations == "having"
 can_move "castle" "e" _ locations = get "key" locations == "having"
 can_move from direction paths _ =
     elem (from, direction) keys
     where (keys, _) = unzip paths
-
+--Logic for restricting user moverment
 restrict_move :: Location -> Direction -> Response
 restrict_move "valley" "n" = "The Cave is too Dark for you to see, you need a source of light to see, Look around.."
 restrict_move "castle" "e" = "You cannot go there, the door is locked from the other side."
 restrict_move _ _ = "You can't go that way."
-
+--Movement logic
+--Check againts the user entered command (n,s,e,w,u,d....) and process location or user action
 move :: Location -> Direction -> PathMap -> Location
 move from direction paths = get (from, direction) paths
 
@@ -138,7 +142,7 @@ game_drop thing paths locations = --(paths, locations, "filler")
     in if there == "having"
         then (paths, (put thing here locations), "Item Dropped!")
         else (paths, locations, "You aren't having it.")
-
+--Movement of user
 go :: String -> PathMap -> LocationMap -> World
 go direction paths locations = do
     let user_location = get "user" locations
@@ -165,7 +169,7 @@ look paths locations =
         else (paths, locations, describe user_location locations ++ "\n\n" ++ things)
     where user_location = get "user" locations
           things = items_here locations
-
+--kill functionality
 kill :: PathMap -> LocationMap -> World
 kill paths locations =
     case get "user" locations of
@@ -186,7 +190,7 @@ kill paths locations =
                       "Your hands do not stand a chance in front of the dragon.\n" ++
                       "You need something else to kill it.")
         _ -> (paths, locations, "There is nothing harmful here")
-
+--i(Inventory) functionality
 inventory :: LocationMap -> Response
 inventory locations =
     let my_stuff = [thing | (thing, "having") <- locations]
@@ -225,7 +229,7 @@ describe_helper "cave" "living" "having" locations = description "cave3"
 describe_helper "cave" "dead" _ locations = description "cave2"
 describe_helper "dragon" "dead" _ locations = description "dragon_second_des"
 describe_helper here _ _ locations = description here
-
+--Description of the various location in the game
 description :: Location -> String
 description "valley" =
     "You stand in a valley, the night is dark and there is silence every where..\nTo Your north lies the mouth" ++
